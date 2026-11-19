@@ -1,0 +1,16 @@
+{
+  "name": "VITA X — Autonomous AI Studio",
+  "short_name": "VITA X",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050811",
+  "theme_color": "#050811",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://flaticon.com",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
