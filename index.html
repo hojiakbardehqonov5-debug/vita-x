@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#050811">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <title>VITA X — AI App & Chat Studio</title>
+    <style>
+        :root {
+            --bg-main: #050811; --bg-card: #0c1222; --bg-input: #070b16;
+            --border: #1b253b; --primary: #0ea5e9; --pro: #f59e0b; --ultra: #a855f7;
+            --text: #f8fafc; --muted: #94a3b8; --green: #10b981; --red: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background: var(--bg-main); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+        .auth-screen {
+            position: fixed; inset: 0; background: var(--bg-main); z-index: 200;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .auth-box {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            width: 100%; max-width: 380px; padding: 24px; display: flex; flex-direction: column; gap: 14px;
+        }
+        .auth-box h2 { text-align: center; font-size: 24px; font-weight: 900; }
+        .auth-box h2 span { color: var(--primary); }
+        .auth-box input {
+            width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 10px; color: #fff; font-size: 14px;
+        }
+        .btn-full {
+            background: var(--primary); color: #fff; border: none; padding: 12px;
+            border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%;
+        }
+
+        .header {
+            padding: 10px 14px; background: var(--bg-main); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;
+        }
+        .brand { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 6px; }
+        .brand span { color: var(--primary); }
+        .badge { font-size: 10px; padding: 3px 7px; border-radius: 6px; font-weight: 800; background: #1e293b; }
+        .badge.PRO { background: rgba(245,158,11,0.2); color: var(--pro); border: 1px solid var(--pro); }
+        .badge.ULTRA { background: rgba(168,85,247,0.2); color: var(--ultra); border: 1px solid var(--ultra); }
+        .controls { display: flex; gap: 6px; align-items: center; }
+        select, .btn-top {
+            background: var(--bg-card); color: #fff; border: 1px solid var(--border);
+            padding: 6px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;
+        }
+        .btn-upgrade { background: linear-gradient(135deg, #f59e0b, #a855f7); border: none; font-weight: 800; }
+
+        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border); }
+        .tab {
+            flex: 1; padding: 10px 4px; text-align: center; font-size: 12px; font-weight: 700;
+            color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+        }
+        .tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); background: rgba(14,165,233,0.08); }
+
+        .panel { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+        .panel.active { display: flex; }
+        .agent-wrap { flex: 1; display: flex; flex-direction: column; padding: 12px; max-width: 850px; width: 100%; margin: 0 auto; overflow: hidden; }
+        .chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 8px; }
+        .msg { padding: 11px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; max-width: 90%; word-wrap: break-word; }
+        .msg.agent { background: var(--bg-card); border: 1px solid var(--border); align-self: flex-start; }
+        .msg.user { background: var(--primary); color: #fff; align-self: flex-end; }
+
+        .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+        .chip {
+            background: var(--bg-card); border: 1px solid var(--border); color: var(--muted);
+            padding: 6px 11px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer;
+        }
+
+        .input-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 10px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .modes { display: flex; gap: 6px; }
+        .mode-btn {
+            flex: 1; padding: 7px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--bg-input); color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer;
+        }
+        .mode-btn.selected { background: rgba(14,165,233,0.2); border-color: var(--primary); color: #fff; }
+        .ta-wrap { position: relative; }
+        textarea {
+            width: 100%; height: 64px; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 10px; color: #fff; padding: 10px 40px 10px 10px; font-size: 14px; resize: none;
+        }
+        .btn-mic {
+            position: absolute; right: 8px; top: 16px; background: #1e293b; border: none; color: #fff;
+            width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+        }
+        .status-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+        .toolbar {
+            background: #0f172a; padding: 8px 14px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; font-size: 12px;
+        }
+        .btn-sm { border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; color: #fff; }
+        iframe { flex: 1; width: 100%; border: none; background: #fff; }
+        .history-list { padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .hist-item {
+            background: var(--bg-card); border: 1px solid var(--border); padding: 12px; border-radius: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 150; align-items: center; justify-content: center; padding: 16px;
+        }
+        .modal-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            width: 100%; max-width: 400px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
+        }
+        .modal-card input, .modal-card select {
+            width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 8px; color: #fff; font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-box">
+            <h2>VITA <span>X</span></h2>
+            <p style="text-align:center; font-size:13px; color:var(--muted);">20 ta tilda dasturlovchi va muloqot qiluvchi AI Studio</p>
+            <input type="email" id="authEmail" placeholder="Email manzilingiz">
+            <input type="password" id="authPass" placeholder="Parol (kamida 8 ta belgi)">
+            <button class="btn-full" onclick="handleAuth('login')">Kirish (Login)</button>
+            <button class="btn-full" style="background:#1e293b;" onclick="handleAuth('register')">Roʻyxatdan oʻtish (10 ta bepul kredit)</button>
+            <p id="authError" style="color:var(--red); font-size:12px; text-align:center;"></p>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="brand">VITA <span>X</span> <span class="badge" id="planBadge">FREE</span></div>
+        <div class="controls">
+            <span id="creditLabel" style="font-size:11px; color:var(--primary); font-weight:700;">10 kr</span>
+            <select id="langSelect">
+                <option value="Uzbek">🇺🇿 Oʻzbek</option>
+                <option value="English">🇺🇸 English</option>
+                <option value="Russian">🇷🇺 Русский</option>
+                <option value="Turkish">🇹🇷 Türkçe</option>
+                <option value="Arabic">🇸🇦 العربية</option>
+                <option value="German">🇩🇪 Deutsch</option>
+                <option value="Spanish">🇪🇸 Español</option>
+                <option value="French">🇫🇷 Français</option>
+                <option value="Chinese">🇨🇳 中文</option>
+                <option value="Japanese">🇯🇵 日本語</option>
+                <option value="Korean">🇰🇷 한국어</option>
+                <option value="Italian">🇮🇹 Italiano</option>
+                <option value="Portuguese">🇵🇹 Português</option>
+                <option value="Hindi">🇮🇳 हिन्दी</option>
+                <option value="Kazakh">🇰🇿 Қазақша</option>
+                <option value="Kyrgyz">🇰🇬 Кыргызча</option>
+                <option value="Tajik">🇹🇯 Тоҷикӣ</option>
+                <option value="Persian">🇮🇷 فارسی</option>
+                <option value="Indonesian">🇮🇩 Indonesia</option>
+                <option value="Polish">🇵🇱 Polski</option>
+            </select>
+            <button class="btn-top btn-upgrade" onclick="openModal('upgradeModal')">PRO/ULTRA</button>
+            <button class="btn-top" onclick="openModal('adminModal')">Admin</button>
+            <button class="btn-top" onclick="logout()">Chiqish</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" id="tAgent" onclick="switchTab('agent')">1. VITA X Agent</div>
+        <div class="tab" id="tPreview" onclick="switchTab('preview')">2. Jonli Ilova</div>
